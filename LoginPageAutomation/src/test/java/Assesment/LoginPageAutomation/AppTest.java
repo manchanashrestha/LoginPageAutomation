@@ -80,9 +80,9 @@ public class AppTest {
 			WebElement alertBox = driver.findElement(By.xpath("//*[@id=\"myModal\"]/div/div/div[2]"));
 			wait.until(ExpectedConditions.visibilityOf(alertBox));
 			Reporter.log("Alert box opened for user role" + alertBox.getText());
-//			ObjSoftAssert.assertEquals(alertBox.getText(), "Cancel Okay", "Cancel or Okay button not available!");
-			ObjSoftAssert.assertTrue(alertBox.getText().contains("Okay"), "Alert text does not contain the expected substring: " + "Cancel or Okay");
-			
+			ObjSoftAssert.assertTrue(alertBox.getText().contains("Okay"),
+					"Alert text does not contain the expected substring: " + "Cancel or Okay");
+
 			driver.findElement(By.id("okayBtn")).click();
 			Reporter.log("Clicked on Okay button");
 			wait.until(ExpectedConditions.invisibilityOf(alertBox));
@@ -90,7 +90,7 @@ public class AppTest {
 		}
 		Reporter.log("Selected " + userRole + " as a user role");
 
-		// Select Student from dropdown
+		// Select teacher from dropdown
 		AppTest test = new AppTest();
 		test.performDropdown(driver, "teach");
 		Reporter.log("Selected teacher from the dropdown");
