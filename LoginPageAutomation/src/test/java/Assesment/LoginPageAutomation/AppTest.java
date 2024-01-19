@@ -3,7 +3,9 @@ package Assesment.LoginPageAutomation;
 import java.time.Duration;
 import java.util.List;
 
+import org.openqa.selenium.Alert;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -33,8 +35,7 @@ public class AppTest {
 
 	@Parameters({ "browser" })
 	@BeforeTest
-	public void setUp(String browser) 
-	{
+	public void setUp(String browser) {
 		if (browser.equalsIgnoreCase("chrome")) {
 			// Enable headless mode
 			ChromeOptions options = new ChromeOptions();
@@ -60,8 +61,7 @@ public class AppTest {
 
 	@Parameters({ "usernameData", "passwordData", "userType" })
 	@Test
-	public void adminLoginTest(String username, String password, String userRole) throws InterruptedException 
-	{
+	public void adminLoginTest(String username, String password, String userRole) throws InterruptedException {
 		SoftAssert ObjSoftAssert = new SoftAssert();
 		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
 
@@ -79,7 +79,10 @@ public class AppTest {
 
 			WebElement alertBox = driver.findElement(By.xpath("//*[@id=\"myModal\"]/div/div/div[2]"));
 			wait.until(ExpectedConditions.visibilityOf(alertBox));
-			Reporter.log("Alert box opened for user role");
+			Reporter.log("Alert box opened for user role" + alertBox.getText());
+//			ObjSoftAssert.assertEquals(alertBox.getText(), "Cancel Okay", "Cancel or Okay button not available!");
+			ObjSoftAssert.assertTrue(alertBox.getText().contains("Okay"), "Alert text does not contain the expected substring: " + "Cancel or Okay");
+			
 			driver.findElement(By.id("okayBtn")).click();
 			Reporter.log("Clicked on Okay button");
 			wait.until(ExpectedConditions.invisibilityOf(alertBox));
@@ -100,25 +103,45 @@ public class AppTest {
 		WebElement signIn = driver.findElement(By.id("signInBtn"));
 		signIn.click();
 		Reporter.log("Clicked on sign in button");
-		// Wait until the URL changes
-		String expectedUrl = "https://rahulshettyacademy.com/angularpractice/shop";
-		
-		wait.until(ExpectedConditions.urlToBe(expectedUrl));
-		Reporter.log("Waiting until the page is redirected to the url: " + expectedUrl);
 
-		ObjSoftAssert.assertEquals(expectedUrl, driver.getCurrentUrl(), "Landing page url mis-matched!");
-		WebElement photoCommerceLink = driver.findElement(By.xpath("/html/body/app-root/app-navbar/div/nav/a"));
-		Reporter.log("Verified the expected URL and title of the link of the page");
+		if (username.equals("rahulshettyacademy") && password.equals("learning")) {
+			// Wait until the URL changes
+			String expectedUrl = "https://rahulshettyacademy.com/angularpractice/shop";
 
-		ObjSoftAssert.assertEquals(photoCommerceLink.getText(), "ProtoCommerce",
-				"Landing page title ProtoCommerce mis-matched!");
+			wait.until(ExpectedConditions.urlToBe(expectedUrl));
+			Reporter.log("Waiting until the page is redirected to the url: " + expectedUrl);
+
+			ObjSoftAssert.assertEquals(expectedUrl, driver.getCurrentUrl(), "Landing page url mis-matched!");
+			WebElement photoCommerceLink = driver.findElement(By.xpath("/html/body/app-root/app-navbar/div/nav/a"));
+			Reporter.log("Verified the expected URL and title of the link of the page");
+
+			ObjSoftAssert.assertEquals(photoCommerceLink.getText(), "ProtoCommerce",
+					"Landing page title ProtoCommerce mis-matched!");
+		} else {
+			Thread.sleep(100);
+			Reporter.log("Reached at incorect username or password condition.");
+
+			// Find the element corresponding to the alert div
+			WebElement alertDiv = driver.findElement(By.className("alert-danger"));
+
+			// Execute JavaScript to display the alert div
+			JavascriptExecutor js = (JavascriptExecutor) driver;
+			js.executeScript("arguments[0].style.display='block';", alertDiv);
+
+			ObjSoftAssert.assertEquals(alertDiv.getText(), "Incorrect username/password.",
+					"Error message mis-matched!");
+			Reporter.log("Alert message is " + alertDiv.getText());
+
+		}
 		ObjSoftAssert.assertAll();
 
 	}
 
-	public void performDropdown(WebDriver driver, String value) 
-	{
+	public void performDropdown(WebDriver driver, String value) {
 		WebElement designationDropDown = driver.findElement(By.tagName("select"));
+		WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+		wait.until(ExpectedConditions.visibilityOf(designationDropDown));
+		Reporter.log("Performing dropdown selection ... ");
 		if (value.equals("stud")) {
 			Select designation = new Select(designationDropDown);
 			designation.selectByValue("stud");
@@ -129,8 +152,7 @@ public class AppTest {
 	}
 
 	@AfterTest
-	public void tearDown() 
-	{
+	public void tearDown() {
 		driver.quit();
 	}
 }

@@ -11,6 +11,7 @@
 					<parameter name="userType" value="admin" />
 
 					<include name="adminLoginTest" />
+					
 				</methods>
 			</class>
 		</classes>
